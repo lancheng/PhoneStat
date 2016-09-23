@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="start_service">开始统计</string>
+	<string name="stop_service">结束统计</string>
+	<string name="app_name">Phone Stats</string>
+</resources>
