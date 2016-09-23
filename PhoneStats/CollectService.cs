@@ -11,13 +11,10 @@ namespace PhoneStats
 	[Service]
 	public class CollectService: Service
 	{
-		public CollectService()
-		{
-		}
-
 		static readonly string TAG = "X:" + typeof(CollectService).Name;
 		static readonly int TimerWait = 4000;
 		Timer _timer;
+		SMSReceiver smsReceiver = new SMSReceiver();
 
 		public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
 		{
@@ -26,6 +23,9 @@ namespace PhoneStats
 							   null,
 							   0,
 							   TimerWait);
+
+			RegisterReceiver(smsReceiver, new IntentFilter("android.provider.Telephony.SMS_RECEIVED"));
+
 			return StartCommandResult.NotSticky;
 		}
 
@@ -37,6 +37,8 @@ namespace PhoneStats
 			_timer = null;
 
 			Log.Debug(TAG, "SimpleService destroyed at {0}.", DateTime.UtcNow);
+			UnregisterReceiver(smsReceiver);
+
 		}
 
 		public override IBinder OnBind(Intent intent)
