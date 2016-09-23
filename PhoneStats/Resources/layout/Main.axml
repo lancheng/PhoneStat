@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <Button
-        android:id="@+id/myButton"
+        android:id="@+id/startButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/start_service" />
@@ -12,5 +12,5 @@
         android:text="@string/stop_service"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/button1" />
+        android:id="@+id/stopButton" />
 </LinearLayout>
