@@ -15,6 +15,7 @@ namespace PhoneStats
 		static readonly int TimerWait = 4000;
 		Timer _timer;
 		SMSReceiver smsReceiver = new SMSReceiver();
+		//SMSSender smsSender = new SMSSender();
 
 		public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
 		{
@@ -25,8 +26,9 @@ namespace PhoneStats
 							   TimerWait);
 
 			RegisterReceiver(smsReceiver, new IntentFilter("android.provider.Telephony.SMS_RECEIVED"));
+			//RegisterReceiver(smsSender, new IntentFilter("android.provider.Telephony.SMS_SENT"));
 
-			return StartCommandResult.NotSticky;
+			return StartCommandResult.Sticky;
 		}
 
 		public override void OnDestroy()
@@ -38,6 +40,7 @@ namespace PhoneStats
 
 			Log.Debug(TAG, "SimpleService destroyed at {0}.", DateTime.UtcNow);
 			UnregisterReceiver(smsReceiver);
+			//UnregisterReceiver(smsSender);
 
 		}
 

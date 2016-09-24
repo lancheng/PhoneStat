@@ -37,7 +37,7 @@ namespace PhoneStats
 		{
 			base.OnStop();
 			// Clean up: shut down the service when the Activity is no longer visible.
-			StopService(new Intent(this, typeof(CollectService)));
+			// StopService(new Intent(this, typeof(CollectService)));
 		}
 	}
 }
