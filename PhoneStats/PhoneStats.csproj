@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CollectService.cs" />
     <Compile Include="StatsReceivers.cs" />
+    <Compile Include="PhoneStateDetector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

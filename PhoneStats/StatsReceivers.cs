@@ -1,12 +1,35 @@
 ﻿using System;
-using Android.App;
 using Android.Content;
 using Android.Widget;
 using Android.Telephony;
 using Android.Util;
+using Android.Net;
 
 namespace PhoneStats
 {
+	public class NetworkStatReceiver : BroadcastReceiver
+	{
+		public override void OnReceive(Context context, Intent intent)
+		{
+			ConnectivityManager connectivityManager = (ConnectivityManager)
+			context.GetSystemService(Context.ConnectivityService);
+			
+			var activeNetworkInfo = connectivityManager.ActiveNetworkInfo;
+			if (activeNetworkInfo != null && activeNetworkInfo.IsConnectedOrConnecting)
+			{
+				// Now that we know it's connected, determine if we're on WiFi or something else.
+				if (activeNetworkInfo.Type == ConnectivityType.Mobile)
+				{
+					Log.Debug(typeof(NetworkStatReceiver).Name, "Use Data");
+					return;
+				}
+					
+			}
+
+			Log.Debug(typeof(NetworkStatReceiver).Name, "Data Disconnected");
+		}
+	};
+
 	public class SMSReceiver : Android.Content.BroadcastReceiver
 	{
 		public static readonly string IntentAction = "android.provider.Telephony.SMS_RECEIVED";
