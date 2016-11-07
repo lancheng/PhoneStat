@@ -52,6 +52,7 @@
     <Compile Include="CollectService.cs" />
     <Compile Include="StatsReceivers.cs" />
     <Compile Include="PhoneStateDetector.cs" />
+    <Compile Include="PhoneStatLog.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

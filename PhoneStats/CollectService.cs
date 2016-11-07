@@ -43,6 +43,8 @@ namespace PhoneStats
 			Log.Debug(TAG, tm.NetworkOperatorName);
 			Log.Debug(TAG, tm.NetworkType.ToString());
 
+			PhoneGPSLog.GetInstance(tm.DeviceId);
+
 			locationManager = (LocationManager)base.GetSystemService(LocationService);
 			Criteria criteriaForLocationService = new Criteria
 			{
@@ -78,6 +80,8 @@ namespace PhoneStats
 
 			var tm = (TelephonyManager)base.GetSystemService(TelephonyService);
 			tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.None);
+
+			PhoneGPSLog.GetInstance(tm.DeviceId).Close();
 
 			locationManager.RemoveUpdates(phoneStateDecetor);
 		}
