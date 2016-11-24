@@ -11,6 +11,7 @@ namespace PhoneStats
 	public class PhoneStateDetector : PhoneStateListener
 	{
 		Context mContext;
+		int mDataActivity = 7; //7 is no data transmission, 6 is data transmission.
 
 		public PhoneStateDetector(Context context)
 		{
@@ -21,11 +22,19 @@ namespace PhoneStats
 		{
 			if (direction == DataActivity.None || direction == DataActivity.Dormant)
 			{
-				PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "7");
+				if (mDataActivity != 7)
+				{
+					mDataActivity = 7;
+					PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "7");
+				}
 			}
 			else
 			{
-				PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "6");
+				if (mDataActivity != 6)
+				{
+					mDataActivity = 6;
+					PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "6");
+				}
 			}
 				
 			base.OnDataActivity(direction);

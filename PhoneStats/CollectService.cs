@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Threading;
-
 using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Util;
 using Android.Telephony;
 using Android.Locations;
+using Android.Widget;
 
 namespace PhoneStats
 {
-	[BroadcastReceiver]
-	[IntentFilter(new[] { Intent.ActionBootCompleted }, Categories = new[] { Intent.CategoryDefault })]
+	[BroadcastReceiver(Enabled = true)]
+	[IntentFilter(new[] { Intent.ActionBootCompleted })]
 	public class StartupReceiver : BroadcastReceiver
 	{
 		public override void OnReceive(Context context, Intent intent)
 		{
+			Toast.MakeText(context, intent.ToString(), ToastLength.Long);
+
 			Intent serviceStart = new Intent(context, typeof(CollectService));
 			context.StartService(serviceStart);
 
