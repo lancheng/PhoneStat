@@ -2,27 +2,38 @@
 using System.Threading;
 
 using Android.App;
-using Android.Widget;
 using Android.Content;
 using Android.OS;
 using Android.Util;
-using Android.Net;
 using Android.Telephony;
 using Android.Locations;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace PhoneStats
 {
+	[BroadcastReceiver]
+	[IntentFilter(new[] { Intent.ActionBootCompleted }, Categories = new[] { Intent.CategoryDefault })]
+	public class StartupReceiver : BroadcastReceiver
+	{
+		public override void OnReceive(Context context, Intent intent)
+		{
+			Intent serviceStart = new Intent(context, typeof(CollectService));
+			context.StartService(serviceStart);
+
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "8");
+		}
+	}
+
 	[Service]
 	public class CollectService: Service
 	{
 		static readonly string TAG = "X:" + typeof(CollectService).Name;
-		string _locationProvider;
 		SMSReceiver smsReceiver = new SMSReceiver();
 		PhoneCallReceiver phoneCallReceiver = new PhoneCallReceiver();
-		NetworkStatReceiver networkStatReceiver = new NetworkStatReceiver();
+		ShutdownReceiver shutdownReceiver = new ShutdownReceiver();
 		PhoneStateDetector phoneStateDecetor;
+
+		GPSLocationLogger mGPSLocLogger;
+		NetworkLocationLogger mNetworkLocaLogger;
 
 		LocationManager locationManager;
 
@@ -33,39 +44,22 @@ namespace PhoneStats
 
 			RegisterReceiver(smsReceiver, new IntentFilter("android.provider.Telephony.SMS_RECEIVED"));
 			RegisterReceiver(phoneCallReceiver, new IntentFilter("android.intent.action.PHONE_STATE"));
-			RegisterReceiver(networkStatReceiver, new IntentFilter(ConnectivityManager.ConnectivityAction));
+			RegisterReceiver(shutdownReceiver, new IntentFilter("android.intent.action.ACTION_SHUTDOWN"));
 
-			phoneStateDecetor = new PhoneStateDetector();
+			phoneStateDecetor = new PhoneStateDetector(this);
+			mGPSLocLogger = new GPSLocationLogger();
+			mNetworkLocaLogger = new NetworkLocationLogger();
 
 			var tm = (TelephonyManager)base.GetSystemService(TelephonyService);
-			tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.CellInfo);
 			tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.CellLocation);
-			Log.Debug(TAG, tm.NetworkOperatorName);
-			Log.Debug(TAG, tm.NetworkType.ToString());
+			tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.DataActivity);
 
-			PhoneGPSLog.GetInstance(tm.DeviceId);
+			PhoneStatLog.GetInstance().DeviceID = tm.DeviceId;
 
 			locationManager = (LocationManager)base.GetSystemService(LocationService);
-			Criteria criteriaForLocationService = new Criteria
-			{
-				Accuracy = Accuracy.Fine
-			};
-
-			IList<string> acceptableLocationProviders = locationManager.GetProviders(criteriaForLocationService, true);
-
-			if (acceptableLocationProviders.Any())
-			{
-				_locationProvider = acceptableLocationProviders.First();
-			}
-			else
-			{
-				_locationProvider = string.Empty;
-			}
-
-			Toast.MakeText(this, _locationProvider, ToastLength.Short).Show();
-
-			locationManager.RequestLocationUpdates(_locationProvider, 0,0,phoneStateDecetor);
-
+			locationManager.RequestLocationUpdates(LocationManager.GpsProvider, 0, 0, mGPSLocLogger);
+			locationManager.RequestLocationUpdates(LocationManager.NetworkProvider, 0, 0, mNetworkLocaLogger);
+		
 			return StartCommandResult.Sticky;
 		}
 
@@ -76,14 +70,15 @@ namespace PhoneStats
 			Log.Debug(TAG, "SimpleService destroyed at {0}.", DateTime.UtcNow);
 			UnregisterReceiver(smsReceiver);
 			UnregisterReceiver(phoneCallReceiver);
-			UnregisterReceiver(networkStatReceiver);
 
 			var tm = (TelephonyManager)base.GetSystemService(TelephonyService);
 			tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.None);
 
-			PhoneGPSLog.GetInstance(tm.DeviceId).Close();
+			PhoneStatLog.GetInstance().Close();
 
-			locationManager.RemoveUpdates(phoneStateDecetor);
+			locationManager.RemoveUpdates(mGPSLocLogger);
+			locationManager.RemoveUpdates(mNetworkLocaLogger);
+
 		}
 
 		public override IBinder OnBind(Intent intent)

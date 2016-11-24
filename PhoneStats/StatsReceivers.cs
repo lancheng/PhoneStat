@@ -1,36 +1,21 @@
 ﻿using System;
+using Android.App;
 using Android.Content;
 using Android.Widget;
 using Android.Telephony;
 using Android.Util;
-using Android.Net;
 
 namespace PhoneStats
 {
-	public class NetworkStatReceiver : BroadcastReceiver
+	public class ShutdownReceiver : BroadcastReceiver
 	{
 		public override void OnReceive(Context context, Intent intent)
 		{
-			ConnectivityManager connectivityManager = (ConnectivityManager)
-			context.GetSystemService(Context.ConnectivityService);
-			
-			var activeNetworkInfo = connectivityManager.ActiveNetworkInfo;
-			if (activeNetworkInfo != null && activeNetworkInfo.IsConnectedOrConnecting)
-			{
-				// Now that we know it's connected, determine if we're on WiFi or something else.
-				if (activeNetworkInfo.Type == ConnectivityType.Mobile)
-				{
-					Log.Debug(typeof(NetworkStatReceiver).Name, "Use Data");
-					return;
-				}
-					
-			}
-
-			Log.Debug(typeof(NetworkStatReceiver).Name, "Data Disconnected");
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "9");
 		}
-	};
+	}
 
-	public class SMSReceiver : Android.Content.BroadcastReceiver
+	public class SMSReceiver : BroadcastReceiver
 	{
 		public static readonly string IntentAction = "android.provider.Telephony.SMS_RECEIVED";
 
@@ -39,7 +24,7 @@ namespace PhoneStats
 			try
 			{
 				if (intent.Action != IntentAction) return;
-				Log.Debug("X:" + typeof(SMSReceiver).Name, "3: Receive a SMS.");
+				PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "4");
 			}
 			catch (Exception ex)
 			{
@@ -78,13 +63,15 @@ namespace PhoneStats
 
 		public PhoneCallState Offhook()
 		{
-			Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "1: Incoming call answered.");
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "1");
+			//Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "1: Incoming call answered.");
 			return PhoneCallOffhook.GetInstance();
 		}
 
 		public PhoneCallState Idle()
 		{
-			Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "2: Incoming call ended.");
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "3");
+			//Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "2: Incoming call ended.");
 			return PhoneCallIdle.GetInstance();
 		}
 	}
@@ -117,7 +104,7 @@ namespace PhoneStats
 
 		public PhoneCallState Idle()
 		{
-			Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "2: call ended.");
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "3");
 			return PhoneCallIdle.GetInstance();
 		}
 	}
@@ -139,13 +126,13 @@ namespace PhoneStats
 
 		public PhoneCallState Ring()
 		{
-			Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "Incoming call.");
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "1");
 			return PhoneCallRing.GetInstance();
 		}
 
 		public PhoneCallState Offhook()
 		{
-			Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "0: Outgoing call.");
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "0");
 			return PhoneCallOffhook.GetInstance();
 		}
 
