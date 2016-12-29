@@ -12,6 +12,9 @@ namespace PhoneStats
 	{
 		Context mContext;
 		int mDataActivity = 7; //7 is no data transmission, 6 is data transmission.
+        int mCid = -1;
+        int mLac = -1;
+        NetworkType mType = NetworkType.Unknown;
 
 		public PhoneStateDetector(Context context)
 		{
@@ -20,6 +23,8 @@ namespace PhoneStats
 
 		public override void OnDataActivity(DataActivity direction)
 		{
+            base.OnDataActivity(direction);
+
 			if (direction == DataActivity.None || direction == DataActivity.Dormant)
 			{
 				if (mDataActivity != 7)
@@ -36,12 +41,12 @@ namespace PhoneStats
 					PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "6");
 				}
 			}
-				
-			base.OnDataActivity(direction);
 		}
 
 		public override void OnCellLocationChanged(CellLocation location)
 		{
+            base.OnCellLocationChanged(location);
+
 			var locationManager = (LocationManager)mContext.GetSystemService(Context.LocationService);
 			var teleManager = (TelephonyManager)mContext.GetSystemService(Context.TelephonyService);
 
@@ -58,6 +63,15 @@ namespace PhoneStats
 				cid = ((Android.Telephony.Cdma.CdmaCellLocation)location).BaseStationId;
 				lac = ((Android.Telephony.Cdma.CdmaCellLocation)location).NetworkId;
 			}
+
+            if(mType != NetworkType.Unknown && mCid == cid && mLac == lac)
+            {
+                return;
+            }
+
+            mCid = cid;
+            mLac = lac;
+            mType = teleManager.NetworkType;
 
 			double lat = -1.0;
 			double lng = -1.0;
@@ -108,7 +122,6 @@ namespace PhoneStats
 			                                   cid.ToString(), lac.ToString(),
 				                               lat.ToString(), lng.ToString(), gps_type, 
 			                                   teleManager.NetworkOperatorName, teleManager.NetworkType.ToString());
-			base.OnCellLocationChanged(location);
 		}
 	}
 

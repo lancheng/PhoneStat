@@ -52,17 +52,35 @@ namespace PhoneStats
 			mNetworkLocaLogger = new NetworkLocationLogger();
 
 			var tm = (TelephonyManager)base.GetSystemService(TelephonyService);
-			tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.CellLocation);
-			tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.DataActivity);
+            tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.DataActivity | PhoneStateListenerFlags.CellLocation);
 
 			PhoneStatLog.GetInstance().DeviceID = tm.DeviceId;
 
 			locationManager = (LocationManager)base.GetSystemService(LocationService);
 			locationManager.RequestLocationUpdates(LocationManager.GpsProvider, 0, 0, mGPSLocLogger);
 			locationManager.RequestLocationUpdates(LocationManager.NetworkProvider, 0, 0, mNetworkLocaLogger);
+
+            RegisterForegroundService();
 		
 			return StartCommandResult.Sticky;
 		}
+
+        void RegisterForegroundService()
+        {
+            var notification = new Notification.Builder(this)
+                .SetContentTitle(Resources.GetString(Resource.String.app_name))
+                //.SetContentText(Resources.GetString(Resource.String.notification_text))
+                //.SetSmallIcon(Resource.Drawable.ic_stat_name)
+                //.SetContentIntent(BuildIntentToShowMainActivity())
+                .SetOngoing(true)
+                //.AddAction(BuildRestartTimerAction())
+                //.AddAction(BuildStopServiceAction())
+                .Build();
+
+
+            // Enlist this instance of the service as a foreground service
+            StartForeground(10000, notification);
+        }
 
 		public override void OnDestroy()
 		{
@@ -79,6 +97,11 @@ namespace PhoneStats
 
 			locationManager.RemoveUpdates(mGPSLocLogger);
 			locationManager.RemoveUpdates(mNetworkLocaLogger);
+
+            StopForeground(true);
+
+            var notificationManager = (NotificationManager)GetSystemService(NotificationService);
+            notificationManager.Cancel(10000);
 
 		}
 
