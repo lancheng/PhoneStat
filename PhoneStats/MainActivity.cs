@@ -61,7 +61,7 @@ namespace PhoneStats
 		private bool IsServiceRunning()
 		{
 			ActivityManager activityManager = (ActivityManager)GetSystemService(ActivityService);
-			var serviceInstance = activityManager.GetRunningServices(int.MaxValue).ToList().FirstOrDefault(service => service.Service.ShortClassName.Contains("CollectService"));
+            var serviceInstance = activityManager.GetRunningServices(int.MaxValue).ToList().FirstOrDefault(service => service.Service.PackageName.Contains("com.trafficindex.phone_stats") && service.Service.ShortClassName.Contains(".CollectService"));
 			return serviceInstance != null;
 		}
 
