@@ -63,7 +63,7 @@ namespace PhoneStats
 
 		public PhoneCallState Offhook()
 		{
-			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "1");
+			PhoneStatLog.GetInstance().LogPhone(DateTime.Now.ToString(), "2");
 			//Log.Debug("X:" + typeof(PhoneCallReceiver).Name, "1: Incoming call answered.");
 			return PhoneCallOffhook.GetInstance();
 		}
