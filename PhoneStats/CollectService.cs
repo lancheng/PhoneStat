@@ -39,6 +39,15 @@ namespace PhoneStats
 		LocationManager locationManager;
 
 
+        public override void OnCreate()
+        {
+            base.OnCreate();
+            
+            phoneStateDecetor = new PhoneStateDetector(this);
+            mGPSLocLogger = new GPSLocationLogger();
+            mNetworkLocaLogger = new NetworkLocationLogger();
+        }
+
 		public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
 		{
 			Log.Debug(TAG, "OnStartCommand called at {2}, flags={0}, startid={1}", flags, startId, DateTime.UtcNow);
@@ -46,10 +55,6 @@ namespace PhoneStats
 			RegisterReceiver(smsReceiver, new IntentFilter("android.provider.Telephony.SMS_RECEIVED"));
 			RegisterReceiver(phoneCallReceiver, new IntentFilter("android.intent.action.PHONE_STATE"));
 			RegisterReceiver(shutdownReceiver, new IntentFilter("android.intent.action.ACTION_SHUTDOWN"));
-
-			phoneStateDecetor = new PhoneStateDetector(this);
-			mGPSLocLogger = new GPSLocationLogger();
-			mNetworkLocaLogger = new NetworkLocationLogger();
 
 			var tm = (TelephonyManager)base.GetSystemService(TelephonyService);
             tm.Listen(phoneStateDecetor, PhoneStateListenerFlags.DataActivity | PhoneStateListenerFlags.CellLocation);
